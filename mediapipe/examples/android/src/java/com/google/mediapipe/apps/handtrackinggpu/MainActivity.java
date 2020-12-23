@@ -3,22 +3,15 @@ package com.google.mediapipe.apps.handtrackinggpu;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmark;
-import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList;
-import com.google.mediapipe.components.CameraHelper;
+
 import com.google.mediapipe.components.FrameProcessor;
-import com.google.mediapipe.components.PermissionHelper;
 import com.google.mediapipe.framework.AndroidAssetUtil;
 import com.google.mediapipe.framework.AndroidPacketCreator;
 import com.google.mediapipe.framework.Packet;
-import com.google.mediapipe.framework.PacketCallback;
-import com.google.mediapipe.framework.PacketGetter;
 import com.google.mediapipe.glutil.EglManager;
 
 import java.util.HashMap;
@@ -136,8 +129,6 @@ public class MainActivity extends Activity {
                             }
                         });
     }
-
-
 
     private void startProducer(){
         bitmapProducer = new BmpProducer(this);

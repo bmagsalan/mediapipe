@@ -44,7 +44,7 @@ public class BmpProducer extends Thread {
                 }
             });*/
             try{
-                Thread.sleep(10);
+                Thread.sleep(1000);
             }catch (Exception e){
                 Log.d(TAG,e.toString());
             }
