@@ -1,5 +1,6 @@
 package com.google.mediapipe.apps.handtrackinggpu;
 
+import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,7 +26,7 @@ import java.util.Map;
 
 
 /** Main activity of MediaPipe example apps. */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
 
     private static final String BINARY_GRAPH_NAME = "hand_tracking_mobile_gpu.binarypb";
@@ -92,43 +93,6 @@ public class MainActivity extends AppCompatActivity {
         inputSidePackets.put(INPUT_NUM_HANDS_SIDE_PACKET_NAME, packetCreator.createInt32(NUM_HANDS));
         processor.setInputSidePackets(inputSidePackets);
 
-       /* processor.addPacketCallback(
-                OUTPUT_HAND_PRESENCE_STREAM_NAME,
-                (packet) -> {
-                    Boolean handPresence = PacketGetter.getBool(packet);
-                    if (!handPresence) {
-                        Log.d(
-                                TAG,
-                                "[TS:" + packet.getTimestamp() + "] Hand presence is false, no hands detected.");
-                    }
-                });
-
-
-        processor.addPacketCallback(
-                OUTPUT_LANDMARKS_STREAM_NAME,
-                (packet) -> {
-                    byte[] landmarksRaw = PacketGetter.getProtoBytes(packet);
-                    try {
-                        NormalizedLandmarkList landmarks = NormalizedLandmarkList.parseFrom(landmarksRaw);
-                        if (landmarks == null) {
-                            Log.d(TAG, "[TS:" + packet.getTimestamp() + "] No hand landmarks.");
-                            return;
-                        }
-                        // Note: If hand_presence is false, these landmarks are useless.
-                        Log.d(
-                                TAG,
-                                "[TS:"
-                                        + packet.getTimestamp()
-                                        + "] #Landmarks for hand: "
-                                        + landmarks.getLandmarkCount());
-                        Log.d(TAG, getLandmarksDebugString(landmarks));
-                    } catch (Exception e) {
-                        Log.e(TAG, "Couldn't Exception received - " + e);
-                        return;
-                    }
-                });*/
-
-        PermissionHelper.checkAndRequestCameraPermissions(this);
     }
 
     @Override
@@ -146,12 +110,6 @@ public class MainActivity extends AppCompatActivity {
         converter.close();
     }
 
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        PermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
 
     private void setupPreviewDisplayView() {
         previewDisplayView.setVisibility(View.GONE);
@@ -186,23 +144,5 @@ public class MainActivity extends AppCompatActivity {
         previewDisplayView.setVisibility(View.VISIBLE);
     }
 
-    private static String getLandmarksDebugString(NormalizedLandmarkList landmarks) {
-        int landmarkIndex = 0;
-        String landmarksString = "";
-        for (NormalizedLandmark landmark : landmarks.getLandmarkList()) {
-            landmarksString +=
-                    "\t\tLandmark["
-                            + landmarkIndex
-                            + "]: ("
-                            + landmark.getX()
-                            + ", "
-                            + landmark.getY()
-                            + ", "
-                            + landmark.getZ()
-                            + ")\n";
-            ++landmarkIndex;
-        }
-        return landmarksString;
-    }
 }
 

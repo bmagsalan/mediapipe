@@ -42,7 +42,7 @@ android_binary(
         "//mediapipe/modules/palm_detection:palm_detection.tflite",
     ],
     assets_dir = "",
-    manifest = "//mediapipe/examples/android/src/java/com/google/mediapipe/apps/basic:AndroidManifest.xml",
+    manifest = "//mediapipe/examples/android/src/java/com/google/mediapipe/apps/handtrackinggpu:AndroidManifest.xml",
     manifest_values = {
         "applicationId": "com.google.mediapipe.apps.handtrackinggpu",
         "appName": "Hand Tracking",
@@ -55,9 +55,9 @@ android_binary(
         "converterNumBuffers": "2",
     },
     multidex = "native",
+    resource_files = glob(["res/**"]),
     deps = [
         ":mediapipe_jni_lib",
-        "//mediapipe/examples/android/src/java/com/google/mediapipe/apps/basic:basic_lib",
         "//mediapipe/framework/formats:landmark_java_proto_lite",
         "//mediapipe/java/com/google/mediapipe/components:android_camerax_helper",
         "//mediapipe/java/com/google/mediapipe/components:android_components",
