@@ -17,11 +17,17 @@ public class BmpProducer extends Thread {
     BmpProducer(Context context){
         Toast.makeText(context, "BmpProducer", Toast.LENGTH_SHORT).show();
         this.context = context;
-        bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.img2);
-        bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
+//        bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.img2);
+//        bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
+//        height = bmp.getHeight();
+//        width = bmp.getWidth();
+        start();
+    }
+
+    public void loadBitmaps(Bitmap bitmap ){
+        bmp = bitmap;
         height = bmp.getHeight();
         width = bmp.getWidth();
-        start();
     }
 
     public void setCustomFrameAvailableListner(CustomFrameAvailableListner customFrameAvailableListner){
@@ -43,6 +49,9 @@ public class BmpProducer extends Thread {
                     OTMainActivity.imageView.setImageBitmap(bg);
                 }
             });*/
+
+            bmp = null;
+
             try{
                 Thread.sleep(1000);
             }catch (Exception e){

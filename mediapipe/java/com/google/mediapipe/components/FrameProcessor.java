@@ -212,13 +212,13 @@ public class FrameProcessor implements TextureFrameProcessor, AudioDataProcessor
                 // Note: each consumer will release its TextureFrame, so each gets a separate object
                 // (though they all reference the same data).
                 TextureFrame frame = PacketGetter.getTextureFrame(packet);
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+//                if (Log.isLoggable(TAG, Log.VERBOSE)) {
                   Log.v(
                       TAG,
                       String.format(
                           "Output tex: %d width: %d height: %d to consumer %h",
                           frame.getTextureName(), frame.getWidth(), frame.getHeight(), consumer));
-                }
+//                }
                 consumer.onNewFrame(frame);
               }
             }
@@ -429,7 +429,7 @@ public class FrameProcessor implements TextureFrameProcessor, AudioDataProcessor
       }
 
       if (addFrameListener != null) {
-        addFrameListener.onWillAddFrame(timestamp);
+//        addFrameListener.onWillAddFrame(timestamp);
       }
 
       imagePacket = packetCreator.createGpuBuffer(frame);

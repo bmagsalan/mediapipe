@@ -181,7 +181,7 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
                         frameUpdated = true;
                         Log.d(TAG,"Frame updated ");
                         if (consumer != null) {
-                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+//                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
                                 Log.v(
                                         TAG,
                                         String.format(
@@ -189,7 +189,7 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
                                                 outputFrame.getTextureName(),
                                                 outputFrame.getWidth(),
                                                 outputFrame.getHeight()));
-                            }
+//                            }
                             outputFrame.setInUse();
                             Log.d(TAG,"Frame sending to consumer");
                             consumer.onNewFrame(outputFrame);
