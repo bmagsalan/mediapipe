@@ -21,6 +21,7 @@ import com.google.common.flogger.FluentLogger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Map;
 import javax.annotation.Nullable;
 
@@ -125,18 +126,51 @@ public class ShaderUtil {
     return textureName[0];
   }
 
+//  /**
+//   * Creates a texture from a Bitmap. Binds it to texture unit 0 to perform setup.
+//   *
+//   * @return the name of the new texture.
+//   */
+//  public static int createRgbaTexture(Bitmap bitmap) {
+//    final int[] textureName = new int[] {0};
+//    GLES20.glGenTextures(1, textureName, 0);
+//
+//    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+//    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName[0]);
+//
+////    byte[] pixels = bitmapToRgba(bitmap);
+////
+////    int width = bitmap.getWidth();
+////    int height = bitmap.getHeight();
+////    GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, width, height, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
+//    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+//    ShaderUtil.checkGlError("texImage2D");
+//    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+//    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+//    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+//    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+//    ShaderUtil.checkGlError("texture setup");
+//    return textureName[0];
+//  }
+
   /**
    * Creates a texture from a Bitmap. Binds it to texture unit 0 to perform setup.
    *
    * @return the name of the new texture.
    */
-  public static int createRgbaTexture(Bitmap bitmap) {
+  public static int createRgbaTexture(byte[] pixels, int width, int height) {
     final int[] textureName = new int[] {0};
     GLES20.glGenTextures(1, textureName, 0);
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName[0]);
-    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+
+//    byte[] pixels = bitmapToRgba(bitmap);
+//
+//    int width = bitmap.getWidth();
+//    int height = bitmap.getHeight();
+    GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, width, height, 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
+
     ShaderUtil.checkGlError("texImage2D");
     GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
     GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
@@ -145,6 +179,8 @@ public class ShaderUtil {
     ShaderUtil.checkGlError("texture setup");
     return textureName[0];
   }
+
+
 
   /**
    * Creates a {@link FloatBuffer} with the given arguments as contents.

@@ -13,6 +13,10 @@ public class BmpProducer extends Thread {
 
     public int height = 513,width = 513;
     Bitmap bmp;
+    byte[] pixels;
+    int pxWidth;
+    int pxHeight;
+
 
     BmpProducer(Context context){
         Toast.makeText(context, "BmpProducer", Toast.LENGTH_SHORT).show();

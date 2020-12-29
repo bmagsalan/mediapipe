@@ -210,7 +210,11 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
      * NOTE: must be invoked on GL thread
      */
     private AppTextureFrame nextOutputFrame(Bitmap bitmap) {
-        int textureName = ShaderUtil.createRgbaTexture(bitmap);
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        byte[] pixels = UtilsBitmap.bitmapToRgba(bitmap);
+        int textureName = ShaderUtil.createRgbaTexture(pixels, width, height);
         outputFrameIndex = (outputFrameIndex + 1) % outputFrames.size();
         destinationHeight = bitmap.getHeight();
         destinationWidth = bitmap.getWidth();
@@ -219,6 +223,9 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
         waitUntilReleased(outputFrame);
         return outputFrame;
     }
+
+
+
     private long timestamp=1l;
     private void updateOutputFrame(AppTextureFrame outputFrame) {
         // Populate frame timestamp with surface texture timestamp after render() as renderer

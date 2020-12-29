@@ -22,6 +22,8 @@ import com.google.mediapipe.glutil.EglManager;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /** Main activity of MediaPipe example apps. */
@@ -117,6 +119,12 @@ public class MainActivity extends Activity {
         converter.setConsumer(processor);
         startProducer();
 
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                loadImage(null);
+            }
+        },1000,1000);
 
     }
 
@@ -193,9 +201,9 @@ public class MainActivity extends Activity {
             bmp = Bitmap.createScaledBitmap(bmp, 480, 640, true);
             bitmapProducer.loadBitmaps(bmp);
         }else if( imgCounter % 5 == 1){
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img4);
-                bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
-                bitmapProducer.loadBitmaps(bmp);
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img4);
+            bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
+            bitmapProducer.loadBitmaps(bmp);
         }else if( imgCounter % 5 == 2){
             Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img1);
             bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
@@ -210,8 +218,9 @@ public class MainActivity extends Activity {
             bitmapProducer.loadBitmaps(bmp);
         }
 
-
         imgCounter++;
     }
+
+
 }
 
