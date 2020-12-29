@@ -46,7 +46,7 @@ android_binary(
     manifest_values = {
         "applicationId": "com.google.mediapipe.apps.handtrackinggpu",
         "appName": "Hand Tracking",
-        "mainActivity": ".MainActivity",
+        "mainActivity": ".CameraPreview",
         "cameraFacingFront": "True",
         "binaryGraphName": "hand_tracking_mobile_gpu.binarypb",
         "inputVideoStreamName": "input_video",

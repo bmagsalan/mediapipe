@@ -80,8 +80,8 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
     }
 
     @Override
-    public void onFrame(Bitmap bitmap) {
-        thread.onFrame(bitmap);
+    public void onFrame(byte[] pixels, int width, int height) {
+        thread.onFrame(pixels, width, height);
     }
 
 
@@ -93,11 +93,13 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
         private long nextFrameTimestampOffset = 0;
         private long timestampOffsetNanos = 0;
         private long previousTimestamp = 0;
-        private Bitmap bitmap;
         private boolean previousTimestampValid = false;
 
         protected int destinationWidth = 0;
         protected int destinationHeight = 0;
+        private byte[] pixels;
+
+
         public RenderThread(@Nullable Object parentContext, int numBuffers) {
             super(parentContext);
             outputFrames = new ArrayList<>();
@@ -160,23 +162,16 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
 
         }
 
-        @Override
-        public void onFrame(Bitmap bitmap) {
-            Log.d(TAG,"New Frame");
-            this.bitmap = bitmap;
-
-            handler.post(() -> renderNext());
-        }
 
         protected void renderNext() {
-            if (bitmap == null) {
+            if (pixels == null) {
                 return;
             }
             try {
                 synchronized (consumers) {
                     boolean frameUpdated = false;
                     for (TextureFrameConsumer consumer : consumers) {
-                        AppTextureFrame outputFrame = nextOutputFrame(bitmap);
+                        AppTextureFrame outputFrame = nextOutputFrame(pixels, destinationWidth,destinationHeight);
                         updateOutputFrame(outputFrame);
                         frameUpdated = true;
                         Log.d(TAG,"Frame updated ");
@@ -196,7 +191,7 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
                         }
                     }
                     if (!frameUpdated) {  // Need to update the frame even if there are no consumers.
-                        AppTextureFrame outputFrame = nextOutputFrame(bitmap);
+                        AppTextureFrame outputFrame = nextOutputFrame(pixels, destinationWidth,destinationHeight);
                         updateOutputFrame(outputFrame);
                     }
                 }
@@ -209,15 +204,11 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
     /**
      * NOTE: must be invoked on GL thread
      */
-    private AppTextureFrame nextOutputFrame(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        byte[] pixels = UtilsBitmap.bitmapToRgba(bitmap);
+    private AppTextureFrame nextOutputFrame(byte[] pixels, int width, int height) {
         int textureName = ShaderUtil.createRgbaTexture(pixels, width, height);
         outputFrameIndex = (outputFrameIndex + 1) % outputFrames.size();
-        destinationHeight = bitmap.getHeight();
-        destinationWidth = bitmap.getWidth();
+        destinationHeight = width;
+        destinationWidth = height;
         setupDestination(outputFrameIndex, textureName);
         AppTextureFrame outputFrame = outputFrames.get(outputFrameIndex);
         waitUntilReleased(outputFrame);
@@ -270,6 +261,16 @@ public class BitmapConverter implements TextureFrameProducer, CustomFrameAvailab
             throw new RuntimeException(ie);
         }
     }
-}
+
+        @Override
+        public void onFrame(byte[] pixels, int width, int height) {
+            Log.d(TAG,"New Frame");
+            this.pixels = pixels;
+            this.destinationWidth = width;
+            this.destinationHeight = height;
+
+            handler.post(() -> renderNext());
+        }
+    }
 
 }

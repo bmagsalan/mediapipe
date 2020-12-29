@@ -12,10 +12,7 @@ public class BmpProducer extends Thread {
     CustomFrameAvailableListner customFrameAvailableListner;
 
     public int height = 513,width = 513;
-    Bitmap bmp;
     byte[] pixels;
-    int pxWidth;
-    int pxHeight;
 
 
     BmpProducer(Context context){
@@ -28,10 +25,11 @@ public class BmpProducer extends Thread {
         start();
     }
 
-    public void loadBitmaps(Bitmap bitmap ){
-        bmp = bitmap;
-        height = bmp.getHeight();
-        width = bmp.getWidth();
+    public void loadBitmaps(byte[] pixels, int width, int height ){
+        this.pixels = pixels;
+        this.width = width;
+        this.height = height;
+
     }
 
     public void setCustomFrameAvailableListner(CustomFrameAvailableListner customFrameAvailableListner){
@@ -43,10 +41,10 @@ public class BmpProducer extends Thread {
     public void run() {
         super.run();
         while ((true)){
-            if(bmp==null || customFrameAvailableListner == null)
+            if(pixels==null || customFrameAvailableListner == null)
                 continue;
             Log.d(TAG,"Writing frame");
-            customFrameAvailableListner.onFrame(bmp);
+            customFrameAvailableListner.onFrame(pixels,width,height);
             /*OTMainActivity.imageView.post(new Runnable() {
                 @Override
                 public void run() {
@@ -54,7 +52,7 @@ public class BmpProducer extends Thread {
                 }
             });*/
 
-            bmp = null;
+            pixels = null;
 
             try{
                 Thread.sleep(1000);
