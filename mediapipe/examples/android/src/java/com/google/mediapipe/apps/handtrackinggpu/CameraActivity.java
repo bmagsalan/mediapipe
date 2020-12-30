@@ -75,8 +75,7 @@ import java.lang.ref.WeakReference;
  * <li> (For most things) The UI thread updates some text views.
  * </ol>
  */
-public class CameraActivity extends Activity implements SurfaceHolder.Callback
-        {
+public class CameraActivity extends Activity implements SurfaceHolder.Callback       {
     private static final String TAG = CameraActivity.class.getSimpleName();
 
     private static final int DEFAULT_ZOOM_PERCENT = 0;      // 0-100
@@ -101,16 +100,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback
 
     // Receives messages from renderer thread.
     private MainHandler mHandler;
-
-
-    // These values are passed to us by the camera/render thread, and displayed in the UI.
-    // We could also just peek at the values in the RenderThread object, but we'd need to
-    // synchronize access carefully.
-    private int mCameraPreviewWidth, mCameraPreviewHeight;
-    private float mCameraPreviewFps;
-    private int mRectWidth, mRectHeight;
-    private int mZoomWidth, mZoomHeight;
-    private int mRotateDeg;
 
 
     @Override
@@ -238,17 +227,17 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback
      * Receives messages from the renderer thread with UI-related updates, like the camera
      * parameters (which we show in a text message on screen).
      */
-    private static class MainHandler extends Handler {
+    public static class MainHandler extends Handler {
         private static final int MSG_SEND_CAMERA_PARAMS0 = 0;
         private static final int MSG_SEND_CAMERA_PARAMS1 = 1;
         private static final int MSG_SEND_RECT_SIZE = 2;
         private static final int MSG_SEND_ZOOM_AREA = 3;
         private static final int MSG_SEND_ROTATE_DEG = 4;
 
-        private WeakReference<CameraActivity> mWeakActivity;
+        private WeakReference<Activity> mWeakActivity;
 
-        public MainHandler(CameraActivity activity) {
-            mWeakActivity = new WeakReference<CameraActivity>(activity);
+        public MainHandler(Activity activity) {
+            mWeakActivity = new WeakReference<Activity>(activity);
         }
 
         /**
@@ -292,42 +281,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback
 
         @Override
         public void handleMessage(Message msg) {
-            CameraActivity activity = mWeakActivity.get();
+            Activity activity = mWeakActivity.get();
             if (activity == null) {
                 Log.d(TAG, "Got message for dead activity");
                 return;
             }
 
-            switch (msg.what) {
-                case MSG_SEND_CAMERA_PARAMS0: {
-                    activity.mCameraPreviewWidth = msg.arg1;
-                    activity.mCameraPreviewHeight = msg.arg2;
-                    break;
-                }
-                case MSG_SEND_CAMERA_PARAMS1: {
-                    activity.mCameraPreviewFps = msg.arg1 / 1000.0f;
-                    break;
-                }
-                case MSG_SEND_RECT_SIZE: {
-                    activity.mRectWidth = msg.arg1;
-                    activity.mRectHeight = msg.arg2;
 
-                    break;
-                }
-                case MSG_SEND_ZOOM_AREA: {
-                    activity.mZoomWidth = msg.arg1;
-                    activity.mZoomHeight = msg.arg2;
-
-                    break;
-                }
-                case MSG_SEND_ROTATE_DEG: {
-                    activity.mRotateDeg = msg.arg1;
-
-                    break;
-                }
-                default:
-                    throw new RuntimeException("Unknown message " + msg.what);
-            }
         }
     }
 
@@ -335,7 +295,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback
     /**
      * Thread that handles all rendering and camera operations.
      */
-    private static class RenderThread extends Thread implements
+    public static class RenderThread extends Thread implements
             SurfaceTexture.OnFrameAvailableListener {
         // Object must be created on render thread to get correct Looper, but is used from
         // UI thread, so we need to declare it volatile to ensure the UI thread sees a fully
@@ -708,7 +668,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback
      * The object is created on the render thread, and the various "send" methods are called
      * from the UI thread.
      */
-    private static class RenderHandler extends Handler {
+    public static class RenderHandler extends Handler {
         private static final int MSG_SURFACE_AVAILABLE = 0;
         private static final int MSG_SURFACE_CHANGED = 1;
         private static final int MSG_SURFACE_DESTROYED = 2;
