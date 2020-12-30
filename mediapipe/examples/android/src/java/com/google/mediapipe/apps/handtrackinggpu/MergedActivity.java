@@ -60,7 +60,7 @@ import java.util.TimerTask;
  * </ol>
  */
 public class MergedActivity extends Activity implements SurfaceHolder.Callback {
-    private static final String TAG = CameraActivity.class.getSimpleName();
+    private static final String TAG = MergedActivity.class.getSimpleName();
 
     private static final int DEFAULT_ZOOM_PERCENT = 0;      // 0-100
     private static final int DEFAULT_SIZE_PERCENT = 50;     // 0-100
@@ -80,10 +80,10 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
 
     // Thread that handles rendering and controls the camera.  Started in onResume(),
     // stopped in onPause().
-    private CameraActivity.RenderThread mRenderThread;
+    private RenderThread mRenderThread;
 
     // Receives messages from renderer thread.
-    private CameraActivity.MainHandler mHandler;
+    private MainHandler mHandler;
 
 
     private static final String BINARY_GRAPH_NAME = "hand_tracking_mobile_gpu.binarypb";
@@ -128,7 +128,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_texture_from_camera);
 
-        mHandler = new CameraActivity.MainHandler(this);
+        mHandler = new MainHandler(this);
 
         SurfaceView sv = (SurfaceView) findViewById(R.id.cameraOnTexture_surfaceView);
         SurfaceHolder sh = sv.getHolder();
@@ -207,12 +207,12 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
         super.onResume();
 
 
-        mRenderThread = new CameraActivity.RenderThread(mHandler);
+        mRenderThread = new RenderThread(mHandler);
         mRenderThread.setName("TexFromCam Render");
         mRenderThread.start();
         mRenderThread.waitUntilReady();
 
-        CameraActivity.RenderHandler rh = mRenderThread.getHandler();
+        RenderHandler rh = mRenderThread.getHandler();
         rh.sendZoomValue(DEFAULT_ZOOM_PERCENT);
         rh.sendSizeValue(DEFAULT_SIZE_PERCENT);
         rh.sendRotateValue(DEFAULT_ROTATE_PERCENT);
@@ -246,7 +246,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
         if (mRenderThread == null) {
             return;
         }
-        CameraActivity.RenderHandler rh = mRenderThread.getHandler();
+        RenderHandler rh = mRenderThread.getHandler();
         rh.sendShutdown();
         try {
             mRenderThread.join();
@@ -317,7 +317,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
 
         if (mRenderThread != null) {
             // Normal case -- render thread is running, tell it about the new surface.
-            CameraActivity.RenderHandler rh = mRenderThread.getHandler();
+            RenderHandler rh = mRenderThread.getHandler();
             rh.sendSurfaceAvailable(holder, true);
         } else {
             // Sometimes see this on 4.4.x N5: power off, power on, unlock, with device in
@@ -338,7 +338,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
                 " holder=" + holder);
 
         if (mRenderThread != null) {
-            CameraActivity.RenderHandler rh = mRenderThread.getHandler();
+            RenderHandler rh = mRenderThread.getHandler();
             rh.sendSurfaceChanged(format, width, height);
         } else {
             Log.d(TAG, "Ignoring surfaceChanged");
@@ -350,7 +350,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
     public void surfaceDestroyed(SurfaceHolder holder) {
         // In theory we should tell the RenderThread that the surface has been destroyed.
         if (mRenderThread != null) {
-            CameraActivity.RenderHandler rh = mRenderThread.getHandler();
+            RenderHandler rh = mRenderThread.getHandler();
             rh.sendSurfaceDestroyed();
         }
         Log.d(TAG, "surfaceDestroyed holder=" + holder);
