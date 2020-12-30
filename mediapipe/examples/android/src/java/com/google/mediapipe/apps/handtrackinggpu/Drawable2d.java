@@ -27,15 +27,15 @@ public class Drawable2d {
     /**
      * Simple equilateral triangle (1.0 per side).  Centered on (0,0).
      */
-    private static final float[] TRIANGLE_COORDS = {
-            0.0f, 0.577350269f,   // 0 top
-            -0.5f, -0.288675135f,   // 1 bottom left
-            0.5f, -0.288675135f    // 2 bottom right
+    private static final float TRIANGLE_COORDS[] = {
+         0.0f,  0.577350269f,   // 0 top
+        -0.5f, -0.288675135f,   // 1 bottom left
+         0.5f, -0.288675135f    // 2 bottom right
     };
-    private static final float[] TRIANGLE_TEX_COORDS = {
-            0.5f, 0.0f,     // 0 top center
-            0.0f, 1.0f,     // 1 bottom left
-            1.0f, 1.0f,     // 2 bottom right
+    private static final float TRIANGLE_TEX_COORDS[] = {
+        0.5f, 0.0f,     // 0 top center
+        0.0f, 1.0f,     // 1 bottom left
+        1.0f, 1.0f,     // 2 bottom right
     };
     private static final FloatBuffer TRIANGLE_BUF =
             GlUtil.createFloatBuffer(TRIANGLE_COORDS);
@@ -48,17 +48,17 @@ public class Drawable2d {
      * <p>
      * Triangles are 0-1-2 and 2-1-3 (counter-clockwise winding).
      */
-    private static final float[] RECTANGLE_COORDS = {
-            -0.5f, -0.5f,   // 0 bottom left
-            0.5f, -0.5f,   // 1 bottom right
-            -0.5f, 0.5f,   // 2 top left
-            0.5f, 0.5f,   // 3 top right
+    private static final float RECTANGLE_COORDS[] = {
+        -0.5f, -0.5f,   // 0 bottom left
+         0.5f, -0.5f,   // 1 bottom right
+        -0.5f,  0.5f,   // 2 top left
+         0.5f,  0.5f,   // 3 top right
     };
-    private static final float[] RECTANGLE_TEX_COORDS = {
-            0.0f, 1.0f,     // 0 bottom left
-            1.0f, 1.0f,     // 1 bottom right
-            0.0f, 0.0f,     // 2 top left
-            1.0f, 0.0f      // 3 top right
+    private static final float RECTANGLE_TEX_COORDS[] = {
+        0.0f, 1.0f,     // 0 bottom left
+        1.0f, 1.0f,     // 1 bottom right
+        0.0f, 0.0f,     // 2 top left
+        1.0f, 0.0f      // 3 top right
     };
     private static final FloatBuffer RECTANGLE_BUF =
             GlUtil.createFloatBuffer(RECTANGLE_COORDS);
@@ -72,17 +72,17 @@ public class Drawable2d {
      * The texture coordinates are Y-inverted relative to RECTANGLE.  (This seems to work out
      * right with external textures from SurfaceTexture.)
      */
-    private static final float[] FULL_RECTANGLE_COORDS = {
-            -1.0f, -1.0f,   // 0 bottom left
-            1.0f, -1.0f,   // 1 bottom right
-            -1.0f, 1.0f,   // 2 top left
-            1.0f, 1.0f,   // 3 top right
+    private static final float FULL_RECTANGLE_COORDS[] = {
+        -1.0f, -1.0f,   // 0 bottom left
+         1.0f, -1.0f,   // 1 bottom right
+        -1.0f,  1.0f,   // 2 top left
+         1.0f,  1.0f,   // 3 top right
     };
-    private static final float[] FULL_RECTANGLE_TEX_COORDS = {
-            0.0f, 0.0f,     // 0 bottom left
-            1.0f, 0.0f,     // 1 bottom right
-            0.0f, 1.0f,     // 2 top left
-            1.0f, 1.0f      // 3 top right
+    private static final float FULL_RECTANGLE_TEX_COORDS[] = {
+        0.0f, 0.0f,     // 0 bottom left
+        1.0f, 0.0f,     // 1 bottom right
+        0.0f, 1.0f,     // 2 top left
+        1.0f, 1.0f      // 3 top right
     };
     private static final FloatBuffer FULL_RECTANGLE_BUF =
             GlUtil.createFloatBuffer(FULL_RECTANGLE_COORDS);

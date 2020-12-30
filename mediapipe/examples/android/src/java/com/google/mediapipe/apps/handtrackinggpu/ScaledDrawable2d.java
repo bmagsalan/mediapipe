@@ -15,9 +15,6 @@
  */
 package com.google.mediapipe.apps.handtrackinggpu;
 
-import android.util.Log;
-
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -27,7 +24,7 @@ import java.nio.FloatBuffer;
  * "zoom" effect.
  */
 public class ScaledDrawable2d extends Drawable2d {
-    private static final String TAG = "ScaledDrawable2d";
+    private static final String TAG = ScaledDrawable2d.class.getSimpleName();
 
     private static final int SIZEOF_FLOAT = 4;
 

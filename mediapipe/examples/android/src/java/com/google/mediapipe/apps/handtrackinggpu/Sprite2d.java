@@ -18,7 +18,6 @@ package com.google.mediapipe.apps.handtrackinggpu;
 
 import android.opengl.Matrix;
 
-
 /**
  * Base class for a 2d object.  Includes position, scale, rotation, and flat-shaded color.
  */
@@ -26,6 +25,7 @@ public class Sprite2d {
     private static final String TAG = GlUtil.TAG;
 
     private Drawable2d mDrawable;
+    private float mColor[];
     private int mTextureId;
     private float mAngle;
     private float mScaleX, mScaleY;
@@ -38,6 +38,8 @@ public class Sprite2d {
 
     public Sprite2d(Drawable2d drawable) {
         mDrawable = drawable;
+        mColor = new float[4];
+        mColor[3] = 1.0f;
         mTextureId = -1;
 
         mModelViewMatrix = new float[16];
@@ -141,10 +143,40 @@ public class Sprite2d {
     }
 
     /**
+     * Sets color to use for flat-shaded rendering.  Has no effect on textured rendering.
+     */
+    public void setColor(float red, float green, float blue) {
+        mColor[0] = red;
+        mColor[1] = green;
+        mColor[2] = blue;
+    }
+
+    /**
      * Sets texture to use for textured rendering.  Has no effect on flat-shaded rendering.
      */
     public void setTexture(int textureId) {
         mTextureId = textureId;
+    }
+
+    /**
+     * Returns the color.
+     * <p>
+     * To avoid allocations, this returns internal state.  The caller must not modify it.
+     */
+    public float[] getColor() {
+        return mColor;
+    }
+
+    /**
+     * Draws the rectangle with the supplied program and projection matrix.
+     */
+    public void draw(FlatShadedProgram program, float[] projectionMatrix) {
+        // Compute model/view/projection matrix.
+        Matrix.multiplyMM(mScratchMatrix, 0, projectionMatrix, 0, getModelViewMatrix(), 0);
+
+        program.draw(mScratchMatrix, mColor, mDrawable.getVertexArray(), 0,
+                mDrawable.getVertexCount(), mDrawable.getCoordsPerVertex(),
+                mDrawable.getVertexStride());
     }
 
     /**
@@ -164,6 +196,7 @@ public class Sprite2d {
     public String toString() {
         return "[Sprite2d pos=" + mPosX + "," + mPosY +
                 " scale=" + mScaleX + "," + mScaleY + " angle=" + mAngle +
+                " color={" + mColor[0] + "," + mColor[1] + "," + mColor[2] +
                 "} drawable=" + mDrawable + "]";
     }
 }

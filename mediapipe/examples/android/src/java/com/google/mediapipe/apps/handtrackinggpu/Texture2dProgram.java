@@ -16,15 +16,11 @@
 
 package com.google.mediapipe.apps.handtrackinggpu;
 
-import android.content.Context;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.nio.FloatBuffer;
-
 
 /**
  * GL program and supporting functions for textured 2D shapes.
@@ -33,22 +29,7 @@ public class Texture2dProgram {
     private static final String TAG = GlUtil.TAG;
 
     public enum ProgramType {
-        ORIGINAL, 
-        HIGH_CONTRAST, 
-        BLACK_ON_WHITE, 
-        WHITE_ON_BLACK, 
-        BLACK_ON_YELLOW, 
-        YELLOW_ON_BLACK, 
-        BLACK_ON_GREEN, 
-        GREEN_ON_BLACK, 
-        BLUE_ON_YELLOW, 
-        YELLOW_ON_BLUE, 
-        GRAYSCALE,
-        SOBEL_R,
-        SOBEL_G,
-        SOBEL_B,
-        SOBEL_BW,
-        SOBEL_WB
+        TEXTURE_2D, TEXTURE_EXT, TEXTURE_EXT_BW, TEXTURE_EXT_FILT
     }
 
     // Simple vertex shader, used for all programs.
@@ -63,7 +44,37 @@ public class Texture2dProgram {
             "    vTextureCoord = (uTexMatrix * aTextureCoord).xy;\n" +
             "}\n";
 
-    
+    // Simple fragment shader for use with "normal" 2D textures.
+    private static final String FRAGMENT_SHADER_2D =
+            "precision mediump float;\n" +
+            "varying vec2 vTextureCoord;\n" +
+            "uniform sampler2D sTexture;\n" +
+            "void main() {\n" +
+            "    gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
+            "}\n";
+
+    // Simple fragment shader for use with external 2D textures (e.g. what we get from
+    // SurfaceTexture).
+    private static final String FRAGMENT_SHADER_EXT =
+            "#extension GL_OES_EGL_image_external : require\n" +
+            "precision mediump float;\n" +
+            "varying vec2 vTextureCoord;\n" +
+            "uniform samplerExternalOES sTexture;\n" +
+            "void main() {\n" +
+            "    gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
+            "}\n";
+
+    // Fragment shader that converts color to black & white with a simple transformation.
+    private static final String FRAGMENT_SHADER_EXT_BW =
+            "#extension GL_OES_EGL_image_external : require\n" +
+            "precision mediump float;\n" +
+            "varying vec2 vTextureCoord;\n" +
+            "uniform samplerExternalOES sTexture;\n" +
+            "void main() {\n" +
+            "    vec4 tc = texture2D(sTexture, vTextureCoord);\n" +
+            "    float color = tc.r * 0.3 + tc.g * 0.59 + tc.b * 0.11;\n" +
+            "    gl_FragColor = vec4(color, color, color, 1.0);\n" +
+            "}\n";
 
     // Fragment shader with a convolution filter.  The upper-left half will be drawn normally,
     // the lower-right half will have the filter applied, and a thin red line will be drawn
@@ -124,80 +135,26 @@ public class Texture2dProgram {
     /**
      * Prepares the program in the current EGL context.
      */
-    public Texture2dProgram(ProgramType programType, Context context) throws Exception {
+    public Texture2dProgram(ProgramType programType) {
         mProgramType = programType;
 
-        
         switch (programType) {
-
-            case ORIGINAL:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[0]);
+            case TEXTURE_2D:
+                mTextureTarget = GLES20.GL_TEXTURE_2D;
+                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_2D);
                 break;
-            case HIGH_CONTRAST:
+            case TEXTURE_EXT:
                 mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[1]);
+                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_EXT);
                 break;
-            case BLACK_ON_WHITE:
+            case TEXTURE_EXT_BW:
                 mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[2]);
+                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_EXT_BW);
                 break;
-            case WHITE_ON_BLACK:
+            case TEXTURE_EXT_FILT:
                 mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[3]);
+                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_EXT_FILT);
                 break;
-            case BLACK_ON_YELLOW:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[4]);
-                break;
-            case YELLOW_ON_BLACK:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[5]);
-                break;
-            case BLACK_ON_GREEN:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[6]);
-                break;
-            case GREEN_ON_BLACK:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[7]);
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelyellow,context));
-                break;
-            case BLUE_ON_YELLOW:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[8]);
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelred,context));
-                break;
-            case YELLOW_ON_BLUE:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[9]);
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelgreen,context));
-                break;
-            case GRAYSCALE:
-                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, Shader.FRAGMENT_SHADER_STRINGS[10]);
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelblue,context));
-                break;
-//            case SOBEL_BW:
-//                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelinverted,context));
-//                break;
-//            case SOBEL_WB:
-//                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobel,context));
-//                break;
-//            case SOBEL_R:
-//                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelred,context));
-//                break;
-//            case SOBEL_G:
-//                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelgreen,context));
-//                break;
-//            case SOBEL_B:
-//                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-//                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, loadRawString(R.raw.sobelblue,context));
-//                break;
             default:
                 throw new RuntimeException("Unhandled type " + programType);
         }
@@ -328,8 +285,8 @@ public class Texture2dProgram {
      * @param texStride Width, in bytes, of the texture data for each vertex.
      */
     public void draw(float[] mvpMatrix, FloatBuffer vertexBuffer, int firstVertex,
-            int vertexCount, int coordsPerVertex, int vertexStride,
-            float[] texMatrix, FloatBuffer texBuffer, int textureId, int texStride) {
+                     int vertexCount, int coordsPerVertex, int vertexStride,
+                     float[] texMatrix, FloatBuffer texBuffer, int textureId, int texStride) {
         GlUtil.checkGlError("draw start");
 
         // Select the program.
@@ -372,8 +329,6 @@ public class Texture2dProgram {
             GLES20.glUniform2fv(muTexOffsetLoc, KERNEL_SIZE, mTexOffset, 0);
             GLES20.glUniform1f(muColorAdjustLoc, mColorAdjust);
         }
-        
-        UtilsOpenGL.mattFShaderFixed(mProgramHandle);
 
         // Draw the rect.
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, firstVertex, vertexCount);
@@ -384,26 +339,5 @@ public class Texture2dProgram {
         GLES20.glDisableVertexAttribArray(maTextureCoordLoc);
         GLES20.glBindTexture(mTextureTarget, 0);
         GLES20.glUseProgram(0);
-    }
-    
-    public void useProgram(){
-        // Select the program.
-        GLES20.glUseProgram(mProgramHandle);
-        GlUtil.checkGlError("glUseProgram");
-    }
-    
-    public int getProgramHandle(){
-    	return mProgramHandle;
-    }
-
-    private String loadRawString(int rawId, Context context) throws Exception{
-        InputStream is = context.getResources().openRawResource(rawId);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int len;
-        while((len = is.read(buf))!= -1){
-            baos.write(buf, 0, len);
-        }
-        return baos.toString();
     }
 }
