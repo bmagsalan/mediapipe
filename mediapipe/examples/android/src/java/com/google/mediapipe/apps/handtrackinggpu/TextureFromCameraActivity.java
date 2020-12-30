@@ -77,8 +77,8 @@ import java.lang.ref.WeakReference;
  * <li> (For most things) The UI thread updates some text views.
  * </ol>
  */
-public class TextureFromCameraActivity extends Activity implements SurfaceHolder.Callback,
-        SeekBar.OnSeekBarChangeListener {
+public class TextureFromCameraActivity extends Activity implements SurfaceHolder.Callback
+        {
     private static final String TAG = TextureFromCameraActivity.class.getSimpleName();
 
     private static final int DEFAULT_ZOOM_PERCENT = 0;      // 0-100
@@ -104,10 +104,6 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
     // Receives messages from renderer thread.
     private MainHandler mHandler;
 
-    // User controls.
-    private SeekBar mZoomBar;
-    private SeekBar mSizeBar;
-    private SeekBar mRotateBar;
 
     // These values are passed to us by the camera/render thread, and displayed in the UI.
     // We could also just peek at the values in the RenderThread object, but we'd need to
@@ -130,17 +126,6 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         SurfaceHolder sh = sv.getHolder();
         sh.addCallback(this);
 
-        mZoomBar = (SeekBar) findViewById(R.id.tfcZoom_seekbar);
-        mSizeBar = (SeekBar) findViewById(R.id.tfcSize_seekbar);
-        mRotateBar = (SeekBar) findViewById(R.id.tfcRotate_seekbar);
-        mZoomBar.setProgress(DEFAULT_ZOOM_PERCENT);
-        mSizeBar.setProgress(DEFAULT_SIZE_PERCENT);
-        mRotateBar.setProgress(DEFAULT_ROTATE_PERCENT);
-        mZoomBar.setOnSeekBarChangeListener(this);
-        mSizeBar.setOnSeekBarChangeListener(this);
-        mRotateBar.setOnSeekBarChangeListener(this);
-
-        updateControls();
     }
 
     @Override
@@ -155,9 +140,9 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         mRenderThread.waitUntilReady();
 
         RenderHandler rh = mRenderThread.getHandler();
-        rh.sendZoomValue(mZoomBar.getProgress());
-        rh.sendSizeValue(mSizeBar.getProgress());
-        rh.sendRotateValue(mRotateBar.getProgress());
+        rh.sendZoomValue(DEFAULT_ZOOM_PERCENT);
+        rh.sendSizeValue(DEFAULT_SIZE_PERCENT);
+        rh.sendRotateValue(DEFAULT_ROTATE_PERCENT);
 
         if (sSurfaceHolder != null) {
             Log.d(TAG, "Sending previous surface");
@@ -238,89 +223,16 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         Log.d(TAG, "surfaceDestroyed holder=" + holder);
         sSurfaceHolder = null;
     }
-
-    @Override   // SeekBar.OnSeekBarChangeListener
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (mRenderThread == null) {
-            // Could happen if we programmatically update the values after setting a listener
-            // but before starting the thread.  Also, easy to cause this by scrubbing the seek
-            // bar with one finger then tapping "recents" with another.
-            Log.w(TAG, "Ignoring onProgressChanged received w/o RT running");
-            return;
-        }
-        RenderHandler rh = mRenderThread.getHandler();
-
-        // "progress" ranges from 0 to 100
-        if (seekBar == mZoomBar) {
-            //Log.v(TAG, "zoom: " + progress);
-            rh.sendZoomValue(progress);
-        } else if (seekBar == mSizeBar) {
-            //Log.v(TAG, "size: " + progress);
-            rh.sendSizeValue(progress);
-        } else if (seekBar == mRotateBar) {
-            //Log.v(TAG, "rotate: " + progress);
-            rh.sendRotateValue(progress);
-        } else {
-            throw new RuntimeException("unknown seek bar");
-        }
-
-        // If we're getting preview frames quickly enough we don't really need this, but
-        // we don't want to have chunky-looking resize movement if the camera is slow.
-        // OTOH, if we get the updates too quickly (60fps camera?), this could jam us
-        // up and cause us to run behind.  So use with caution.
-        rh.sendRedraw();
-    }
-
-    @Override   // SeekBar.OnSeekBarChangeListener
-    public void onStartTrackingTouch(SeekBar seekBar) {}
-    @Override   // SeekBar.OnSeekBarChangeListener
-    public void onStopTrackingTouch(SeekBar seekBar) {}
     @Override
 
     /**
      * Handles any touch events that aren't grabbed by one of the controls.
      */
     public boolean onTouchEvent(MotionEvent e) {
-        float x = e.getX();
-        float y = e.getY();
-
-        switch (e.getAction()) {
-            case MotionEvent.ACTION_MOVE:
-            case MotionEvent.ACTION_DOWN:
-                //Log.v(TAG, "onTouchEvent act=" + e.getAction() + " x=" + x + " y=" + y);
-                if (mRenderThread != null) {
-                    RenderHandler rh = mRenderThread.getHandler();
-                    rh.sendPosition((int) x, (int) y);
-
-                    // Forcing a redraw can cause sluggish-looking behavior if the touch
-                    // events arrive quickly.
-                    //rh.sendRedraw();
-                }
-                break;
-            default:
-                break;
-        }
 
         return true;
     }
 
-    /**
-     * Updates the current state of the controls.
-     */
-    private void updateControls() {
-        String str = getString(R.string.tfcCameraParams, mCameraPreviewWidth,
-                mCameraPreviewHeight, mCameraPreviewFps);
-        TextView tv = (TextView) findViewById(R.id.tfcCameraParams_text);
-        tv.setText(str);
-
-        str = getString(R.string.tfcRectSize, mRectWidth, mRectHeight);
-        tv = (TextView) findViewById(R.id.tfcRectSize_text);
-        tv.setText(str);
-
-        str = getString(R.string.tfcZoomArea, mZoomWidth, mZoomHeight);
-        tv = (TextView) findViewById(R.id.tfcZoomArea_text);
-        tv.setText(str);
-    }
 
     /**
      * Custom message handler for main UI thread.
@@ -396,24 +308,23 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
                 }
                 case MSG_SEND_CAMERA_PARAMS1: {
                     activity.mCameraPreviewFps = msg.arg1 / 1000.0f;
-                    activity.updateControls();
                     break;
                 }
                 case MSG_SEND_RECT_SIZE: {
                     activity.mRectWidth = msg.arg1;
                     activity.mRectHeight = msg.arg2;
-                    activity.updateControls();
+
                     break;
                 }
                 case MSG_SEND_ZOOM_AREA: {
                     activity.mZoomWidth = msg.arg1;
                     activity.mZoomHeight = msg.arg2;
-                    activity.updateControls();
+
                     break;
                 }
                 case MSG_SEND_ROTATE_DEG: {
                     activity.mRotateDeg = msg.arg1;
-                    activity.updateControls();
+
                     break;
                 }
                 default:
