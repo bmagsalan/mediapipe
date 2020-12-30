@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.mediapipe.apps.handtrackinggpu;
+package com.google.mediapipe.apps.handtrackinggpu.gles;
+
+import com.google.mediapipe.apps.handtrackinggpu.Drawable2d;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

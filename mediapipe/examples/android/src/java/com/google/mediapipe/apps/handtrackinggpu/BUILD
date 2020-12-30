@@ -34,7 +34,7 @@ cc_library(
 
 android_binary(
     name = "handtrackinggpu",
-    srcs = glob(["*.java"]),
+    srcs = glob(["*.java","gles/*.java"]),
     assets = [
         "//mediapipe/graphs/hand_tracking:hand_tracking_mobile_gpu.binarypb",
         "//mediapipe/modules/hand_landmark:handedness.txt",

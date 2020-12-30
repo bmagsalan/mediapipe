@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mediapipe.apps.handtrackinggpu;
+package com.google.mediapipe.apps.handtrackinggpu.gles;
 
 import android.opengl.GLES20;
 import android.opengl.GLES30;

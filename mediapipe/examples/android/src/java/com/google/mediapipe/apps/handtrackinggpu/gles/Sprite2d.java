@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.google.mediapipe.apps.handtrackinggpu;
+package com.google.mediapipe.apps.handtrackinggpu.gles;
 
 import android.opengl.Matrix;
+
+import com.google.mediapipe.apps.handtrackinggpu.Drawable2d;
 
 /**
  * Base class for a 2d object.  Includes position, scale, rotation, and flat-shaded color.

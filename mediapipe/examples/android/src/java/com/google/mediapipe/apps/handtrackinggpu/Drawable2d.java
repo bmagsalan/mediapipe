@@ -16,6 +16,8 @@
 
 package com.google.mediapipe.apps.handtrackinggpu;
 
+import com.google.mediapipe.apps.handtrackinggpu.gles.GlUtil;
+
 import java.nio.FloatBuffer;
 
 /**

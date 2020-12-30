@@ -34,6 +34,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 
+import com.google.mediapipe.apps.handtrackinggpu.gles.EglCore;
+import com.google.mediapipe.apps.handtrackinggpu.gles.GlUtil;
+import com.google.mediapipe.apps.handtrackinggpu.gles.ScaledDrawable2d;
+import com.google.mediapipe.apps.handtrackinggpu.gles.Sprite2d;
+import com.google.mediapipe.apps.handtrackinggpu.gles.Texture2dProgram;
+import com.google.mediapipe.apps.handtrackinggpu.gles.WindowSurface;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
