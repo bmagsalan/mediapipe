@@ -47,7 +47,7 @@ android_binary(
         "applicationId": "com.google.mediapipe.apps.handtrackinggpu",
         "appName": "Hand Tracking",
         "mainActivity": ".MainActivity",
-        "cameraFacingFront": "True",
+        "cameraFacingFront": "False",
         "binaryGraphName": "hand_tracking_mobile_gpu.binarypb",
         "inputVideoStreamName": "input_video",
         "outputVideoStreamName": "output_video",

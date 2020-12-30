@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import com.google.mediapipe.components.FrameProcessor;
 import com.google.mediapipe.formats.proto.LandmarkProto;
@@ -87,13 +88,37 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        initCamera();
+        // Create a RelativeLayout container that will hold a SurfaceView,
+        // and set it as the content of our activity.
+        mPreview = new Preview(this);
+        mPreview.setId(ID_CONTENT = View.generateViewId());
+        mPreview.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        previewDisplayView = new SurfaceView(this);
+        previewDisplayView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        LinearLayout mLinear = new LinearLayout(this);
+        mLinear.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mLinear.setOrientation(LinearLayout.VERTICAL);
+        mLinear.addView(mPreview);
+        mLinear.addView(previewDisplayView);
+        setContentView(mLinear);
+
+        // Find the total number of cameras available
+        numberOfCameras = Camera.getNumberOfCameras();
+
+        // Find the ID of the default camera
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                defaultCameraId = i;
+            }
+        }
 
 //        setContentView(R.layout.activity_main);
-        ViewGroup root = (ViewGroup)findViewById(ID_CONTENT);
-        previewDisplayView = new SurfaceView(this);
-        previewDisplayView.setLayoutParams(new ViewGroup.LayoutParams(200,200));
-        root.addView(previewDisplayView);
+//        ViewGroup root = (ViewGroup)findViewById(ID_CONTENT);
+//        previewDisplayView = new SurfaceView(this);
+//        previewDisplayView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+//        root.addView(previewDisplayView);
         previewDisplayView
                 .getHolder()
                 .addCallback(
@@ -156,7 +181,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        cameraResume();
+        mCamera = Camera.open();
+        cameraCurrentlyLocked = defaultCameraId;
+        mPreview.setCamera(mCamera);
 
         converter = new BitmapConverter(eglManager.getContext());
         converter.setConsumer(processor);
@@ -177,47 +204,16 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        converter.close();
-    }
-
-    void initCamera(){
-
-
-        // Create a RelativeLayout container that will hold a SurfaceView,
-        // and set it as the content of our activity.
-        mPreview = new Preview(this);
-        mPreview.setId(ID_CONTENT = View.generateViewId());
-        setContentView(mPreview);
-
-        // Find the total number of cameras available
-        numberOfCameras = Camera.getNumberOfCameras();
-
-        // Find the ID of the default camera
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        for (int i = 0; i < numberOfCameras; i++) {
-            Camera.getCameraInfo(i, cameraInfo);
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                defaultCameraId = i;
-            }
-        }
-    }
-
-    void cameraResume(){
-        // Open the default i.e. the first rear facing camera.
-        mCamera = Camera.open();
-        cameraCurrentlyLocked = defaultCameraId;
-        mPreview.setCamera(mCamera);
-    }
-
-    void cameraPause(){
-        // Because the Camera object is a shared resource, it's very
-        // important to release it when the activity is paused.
         if (mCamera != null) {
             mPreview.setCamera(null);
             mCamera.release();
             mCamera = null;
         }
+
+        converter.close();
     }
+
+
 
 
 
