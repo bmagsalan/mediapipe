@@ -30,8 +30,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 
 import com.google.mediapipe.apps.handtrackinggpu.gles.EglCore;
@@ -77,9 +75,9 @@ import java.lang.ref.WeakReference;
  * <li> (For most things) The UI thread updates some text views.
  * </ol>
  */
-public class TextureFromCameraActivity extends Activity implements SurfaceHolder.Callback
+public class CameraActivity extends Activity implements SurfaceHolder.Callback
         {
-    private static final String TAG = TextureFromCameraActivity.class.getSimpleName();
+    private static final String TAG = CameraActivity.class.getSimpleName();
 
     private static final int DEFAULT_ZOOM_PERCENT = 0;      // 0-100
     private static final int DEFAULT_SIZE_PERCENT = 50;     // 0-100
@@ -247,10 +245,10 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
         private static final int MSG_SEND_ZOOM_AREA = 3;
         private static final int MSG_SEND_ROTATE_DEG = 4;
 
-        private WeakReference<TextureFromCameraActivity> mWeakActivity;
+        private WeakReference<CameraActivity> mWeakActivity;
 
-        public MainHandler(TextureFromCameraActivity activity) {
-            mWeakActivity = new WeakReference<TextureFromCameraActivity>(activity);
+        public MainHandler(CameraActivity activity) {
+            mWeakActivity = new WeakReference<CameraActivity>(activity);
         }
 
         /**
@@ -294,7 +292,7 @@ public class TextureFromCameraActivity extends Activity implements SurfaceHolder
 
         @Override
         public void handleMessage(Message msg) {
-            TextureFromCameraActivity activity = mWeakActivity.get();
+            CameraActivity activity = mWeakActivity.get();
             if (activity == null) {
                 Log.d(TAG, "Got message for dead activity");
                 return;
