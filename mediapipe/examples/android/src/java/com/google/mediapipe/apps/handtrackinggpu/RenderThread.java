@@ -1,5 +1,6 @@
 package com.google.mediapipe.apps.handtrackinggpu;
 
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
@@ -16,7 +17,9 @@ import com.google.mediapipe.apps.handtrackinggpu.gles.Sprite2d;
 import com.google.mediapipe.apps.handtrackinggpu.gles.Texture2dProgram;
 import com.google.mediapipe.apps.handtrackinggpu.gles.WindowSurface;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Thread that handles all rendering and camera operations.
@@ -65,6 +68,8 @@ public class RenderThread extends Thread implements
     private int mSizePercent = DEFAULT_SIZE_PERCENT;
     private int mRotatePercent = DEFAULT_ROTATE_PERCENT;
     private float mPosX, mPosY;
+    private int newWidth;
+    private int newHeight;
 
 
     /**
@@ -256,8 +261,8 @@ public class RenderThread extends Thread implements
         // Max scale is a bit larger than the screen, so we can show over-size.
         float scaled = smallDim * (mSizePercent / 100.0f) * 1.25f;
         float cameraAspect = (float) mCameraPreviewWidth / mCameraPreviewHeight;
-        int newWidth = Math.round(scaled * cameraAspect);
-        int newHeight = Math.round(scaled);
+        newWidth = Math.round(scaled * cameraAspect);
+        newHeight = Math.round(scaled);
 
         float zoomFactor = 1.0f - (mZoomPercent / 100.0f);
         int rotAngle = Math.round(360 * (mRotatePercent / 100.0f));
@@ -284,6 +289,24 @@ public class RenderThread extends Thread implements
     public void frameAvailable() {
         mCameraTexture.updateTexImage();
         draw();
+
+        saveTextureToBitmap();
+    }
+
+    private void saveTextureToBitmap() {
+        int width = newWidth;
+        int height = newHeight;
+        ByteBuffer buffer = ByteBuffer.allocate(width * height * 4);
+        GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(buffer);
+
+        try (FileOutputStream out = new FileOutputStream("/sdcard/my_jpg.jpg")) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
+            // PNG is a lossless format, the compression factor (100) is ignored
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -296,6 +319,11 @@ public class RenderThread extends Thread implements
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         mRect.draw(mTexProgram, mDisplayProjectionMatrix);
         mWindowSurface.swapBuffers();
+
+
+
+
+//        Log.e(TAG, "looper quit");
 
         GlUtil.checkGlError("draw done");
     }
