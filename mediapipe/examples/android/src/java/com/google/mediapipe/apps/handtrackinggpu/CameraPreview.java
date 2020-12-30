@@ -92,4 +92,3 @@ public class CameraPreview extends Activity {
         return true;
     }
 }
-

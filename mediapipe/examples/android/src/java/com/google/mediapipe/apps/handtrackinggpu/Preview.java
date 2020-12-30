@@ -27,7 +27,7 @@ public class Preview extends ViewGroup implements SurfaceHolder.Callback {
     List<Camera.Size> mSupportedPreviewSizes;
     Camera mCamera;
 
-    Preview(Context context) {
+    public Preview(Context context) {
         super(context);
 
         mSurfaceView = new SurfaceView(context);

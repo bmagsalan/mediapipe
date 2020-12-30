@@ -1,15 +1,19 @@
 package com.google.mediapipe.apps.handtrackinggpu;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.google.mediapipe.components.FrameProcessor;
 import com.google.mediapipe.formats.proto.LandmarkProto;
@@ -19,6 +23,7 @@ import com.google.mediapipe.framework.Packet;
 import com.google.mediapipe.framework.PacketGetter;
 import com.google.mediapipe.glutil.EglManager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +73,46 @@ public class MainActivity extends Activity {
     //private CameraXPreviewHelper cameraHelper;
     BmpProducer bitmapProducer;
     private int imgCounter;
+    private Preview mPreview;
+    private int numberOfCameras;
+    private int defaultCameraId;
+    private Camera mCamera;
+    private int cameraCurrentlyLocked;
+    private int ID_CONTENT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        // Hide the window title.
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        initCamera();
+
+//        setContentView(R.layout.activity_main);
+        ViewGroup root = (ViewGroup)findViewById(ID_CONTENT);
         previewDisplayView = new SurfaceView(this);
-        setupPreviewDisplayView();
+        previewDisplayView.setLayoutParams(new ViewGroup.LayoutParams(200,200));
+        root.addView(previewDisplayView);
+        previewDisplayView
+                .getHolder()
+                .addCallback(
+                        new SurfaceHolder.Callback() {
+                            @Override
+                            public void surfaceCreated(SurfaceHolder holder) {
+                                processor.getVideoSurfaceOutput().setSurface(holder.getSurface());
+                            }
+
+                            @Override
+                            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                                bitmapProducer.setCustomFrameAvailableListner(converter);
+                            }
+
+                            @Override
+                            public void surfaceDestroyed(SurfaceHolder holder) {
+                                processor.getVideoSurfaceOutput().setSurface(null);
+                            }
+                        });
 
         // Initialize asset manager so that MediaPipe native libraries can access the app assets, e.g.,
         // binary graphs.
@@ -109,15 +147,21 @@ public class MainActivity extends Activity {
         inputSidePackets.put(INPUT_NUM_HANDS_SIDE_PACKET_NAME, packetCreator.createInt32(NUM_HANDS));
         processor.setInputSidePackets(inputSidePackets);
 
+
+
     }
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
+        cameraResume();
+
         converter = new BitmapConverter(eglManager.getContext());
-        //converter.setFlipY(FLIP_FRAMES_VERTICALLY);
         converter.setConsumer(processor);
-        startProducer();
+        bitmapProducer = new BmpProducer(this);
+
 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -125,6 +169,8 @@ public class MainActivity extends Activity {
                 loadImage(null);
             }
         },1000,1000);
+
+
 
     }
 
@@ -134,37 +180,47 @@ public class MainActivity extends Activity {
         converter.close();
     }
 
+    void initCamera(){
 
-    private void setupPreviewDisplayView() {
-        previewDisplayView.setVisibility(View.GONE);
-        ViewGroup viewGroup = findViewById(R.id.preview_display_layout);
-        viewGroup.addView(previewDisplayView);
 
-        previewDisplayView
-                .getHolder()
-                .addCallback(
-                        new SurfaceHolder.Callback() {
-                            @Override
-                            public void surfaceCreated(SurfaceHolder holder) {
-                                processor.getVideoSurfaceOutput().setSurface(holder.getSurface());
-                            }
+        // Create a RelativeLayout container that will hold a SurfaceView,
+        // and set it as the content of our activity.
+        mPreview = new Preview(this);
+        mPreview.setId(ID_CONTENT = View.generateViewId());
+        setContentView(mPreview);
 
-                            @Override
-                            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                                bitmapProducer.setCustomFrameAvailableListner(converter);
-                            }
+        // Find the total number of cameras available
+        numberOfCameras = Camera.getNumberOfCameras();
 
-                            @Override
-                            public void surfaceDestroyed(SurfaceHolder holder) {
-                                processor.getVideoSurfaceOutput().setSurface(null);
-                            }
-                        });
+        // Find the ID of the default camera
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                defaultCameraId = i;
+            }
+        }
     }
 
-    private void startProducer(){
-        bitmapProducer = new BmpProducer(this);
-        previewDisplayView.setVisibility(View.VISIBLE);
+    void cameraResume(){
+        // Open the default i.e. the first rear facing camera.
+        mCamera = Camera.open();
+        cameraCurrentlyLocked = defaultCameraId;
+        mPreview.setCamera(mCamera);
     }
+
+    void cameraPause(){
+        // Because the Camera object is a shared resource, it's very
+        // important to release it when the activity is paused.
+        if (mCamera != null) {
+            mPreview.setCamera(null);
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+
+
+
 
     private String getMultiHandLandmarksDebugString(List<LandmarkProto.NormalizedLandmarkList> multiHandLandmarks) {
         if (multiHandLandmarks.isEmpty()) {
@@ -216,4 +272,3 @@ public class MainActivity extends Activity {
 
 
 }
-
