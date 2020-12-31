@@ -240,7 +240,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
 
                 }
             }
-        },1000,BmpProducer.THREAD_DELAY);
+        },1000,BmpProducer.THREAD_DELAY * 2);
     }
 
     @Override
@@ -263,25 +263,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
         Log.d(TAG, "onPause END");
     }
 
-    public void loadImage(View view) {
-        Bitmap bmp = null;
-        if( imgCounter % 5 == 0) {
-            bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img3);
-        }else if( imgCounter % 5 == 1){
-            bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img4);
-        }else if( imgCounter % 5 == 2){
-            bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img1);
-        }else if( imgCounter % 5 == 3){
-            bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img5);
-        }else if( imgCounter % 5 == 4){
-            bmp = BitmapFactory.decodeResource(getResources(), R.drawable.img2);
-        }
 
-        bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
-        bitmapProducer.loadBitmaps(UtilsBitmap.bitmapToRgba(bmp),bmp.getWidth(), bmp.getHeight());
-
-        imgCounter++;
-    }
 
     private String getMultiHandLandmarksDebugString(List<LandmarkProto.NormalizedLandmarkList> multiHandLandmarks) {
         if (multiHandLandmarks.isEmpty()) {

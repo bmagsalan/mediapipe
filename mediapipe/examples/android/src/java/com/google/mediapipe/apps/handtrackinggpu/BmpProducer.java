@@ -14,6 +14,7 @@ public class BmpProducer extends Thread {
 
     public int height = 513,width = 513;
     byte[] pixels;
+    Callbacks callbacks = null;
 
 
     BmpProducer(Context context){
@@ -26,10 +27,11 @@ public class BmpProducer extends Thread {
         start();
     }
 
-    public void loadBitmaps(byte[] pixels, int width, int height ){
+    public void loadBitmaps(byte[] pixels, int width, int height, Callbacks callbacks ){
         this.pixels = pixels;
         this.width = width;
         this.height = height;
+        this.callbacks = callbacks;
 
     }
 
@@ -55,11 +57,19 @@ public class BmpProducer extends Thread {
 
             pixels = null;
 
+            if( this.callbacks != null ){
+                this.callbacks.finishdDrawingFrame();
+            }
+
             try{
                 Thread.sleep(THREAD_DELAY);
             }catch (Exception e){
                 Log.d(TAG,e.toString());
             }
         }
+    }
+
+    public interface Callbacks{
+        void finishdDrawingFrame();
     }
 }
