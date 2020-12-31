@@ -70,6 +70,10 @@ public class RenderThread extends Thread implements
     private float mPosX, mPosY;
     private int newWidth;
     private int newHeight;
+    private Object lock = new Object();
+    private ByteBuffer buffer;
+    private Bitmap bitmap;
+    private boolean waitingUntilLoaded;
 
 
     /**
@@ -290,23 +294,46 @@ public class RenderThread extends Thread implements
         mCameraTexture.updateTexImage();
         draw();
 
-        saveTextureToBitmap();
+//        synchronized (lock) {
+//            try {
+                saveTextureToBitmap();
+
+//                lock.wait();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+    }
+
+    public void unlockThread(BmpProducer outPixels){
+        outPixels.loadBitmaps(buffer.array(),mWindowSurfaceWidth,mWindowSurfaceHeight);
+        waitingUntilLoaded = false;
+
+        Log.e(TAG, "unlockThread restarted");
     }
 
     private void saveTextureToBitmap() {
-        int width = newWidth;
-        int height = newHeight;
-        ByteBuffer buffer = ByteBuffer.allocate(width * height * 4);
-        GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.copyPixelsFromBuffer(buffer);
-
-        try (FileOutputStream out = new FileOutputStream("/sdcard/my_jpg.jpg")) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
-            // PNG is a lossless format, the compression factor (100) is ignored
-        } catch (IOException e) {
-            e.printStackTrace();
+        if( waitingUntilLoaded ){
+//            Log.e(TAG, "waitingUntilLoaded started");
+            return;
         }
+
+        waitingUntilLoaded = true;
+
+
+
+        buffer = ByteBuffer.allocate(mWindowSurfaceWidth * mWindowSurfaceHeight * 4);
+        GLES20.glReadPixels(0, 0, mWindowSurfaceWidth, mWindowSurfaceHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buffer);
+//        bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+//        bitmap.copyPixelsFromBuffer(buffer);
+//
+//        try (FileOutputStream out = new FileOutputStream("/sdcard/my_jpg.jpg")) {
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
+//            // PNG is a lossless format, the compression factor (100) is ignored
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     /**

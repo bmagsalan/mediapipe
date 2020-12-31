@@ -233,7 +233,12 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                loadImage(null);
+                if (mRenderThread != null) {
+                    RenderHandler rh = mRenderThread.getHandler();
+                    StructPixelFrame structPixelFrame = new StructPixelFrame();
+                    rh.sendUnlock(bitmapProducer);
+
+                }
             }
         },1000,1000);
     }
@@ -363,6 +368,11 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
      * Handles any touch events that aren't grabbed by one of the controls.
      */
     public boolean onTouchEvent(MotionEvent e) {
+        int action = e.getAction();
+        if( action == MotionEvent.ACTION_UP ){
+//            loadImage(null);
+
+        }
 
         return true;
     }

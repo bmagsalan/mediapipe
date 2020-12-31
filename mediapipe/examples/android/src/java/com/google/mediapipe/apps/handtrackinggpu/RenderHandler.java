@@ -26,6 +26,7 @@ public class RenderHandler extends Handler {
     private static final int MSG_ROTATE_VALUE = 7;
     private static final int MSG_POSITION = 8;
     private static final int MSG_REDRAW = 9;
+    private static final int MSG_UNLOCK = 10;
 
     // This shouldn't need to be a weak ref, since we'll go away when the Looper quits,
     // but no real harm in it.
@@ -137,6 +138,10 @@ public class RenderHandler extends Handler {
         sendMessage(obtainMessage(MSG_REDRAW));
     }
 
+    public void sendUnlock(BmpProducer outFrame) {
+        sendMessage(obtainMessage(MSG_UNLOCK, outFrame));
+    }
+
     @Override  // runs on RenderThread
     public void handleMessage(Message msg) {
         int what = msg.what;
@@ -178,6 +183,9 @@ public class RenderHandler extends Handler {
                 break;
             case MSG_REDRAW:
                 renderThread.draw();
+                break;
+            case MSG_UNLOCK:
+                renderThread.unlockThread((BmpProducer) msg.obj);
                 break;
             default:
                 throw new RuntimeException("unknown message " + what);
