@@ -306,8 +306,8 @@ public class RenderThread extends Thread implements
 
     }
 
-    public void unlockThread(BmpProducer outPixels, BmpProducer.Callbacks callbacks){
-        outPixels.loadBitmaps(buffer.array(),mWindowSurfaceWidth,mWindowSurfaceHeight, callbacks);
+    public void unlockThread(BmpProducer outPixels){
+        outPixels.loadBitmaps(buffer.array(),mWindowSurfaceWidth,mWindowSurfaceHeight);
         waitingUntilLoaded = false;
 
         Log.e(TAG, "unlockThread restarted");

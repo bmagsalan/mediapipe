@@ -34,7 +34,10 @@ cc_library(
 
 android_binary(
     name = "handtrackinggpu",
-    srcs = glob(["*.java","gles/*.java"]),
+    srcs = glob([
+        "*.java",
+        "gles/*.java",
+    ]),
     assets = [
         "//mediapipe/graphs/hand_tracking:hand_tracking_mobile_gpu.binarypb",
         "//mediapipe/modules/hand_landmark:handedness.txt",
@@ -46,7 +49,7 @@ android_binary(
     manifest_values = {
         "applicationId": "com.google.mediapipe.apps.handtrackinggpu",
         "appName": "Hand Tracking",
-        "mainActivity": ".MergedActivity",
+        "mainActivity": ".MainActivity",
         "cameraFacingFront": "False",
         "binaryGraphName": "hand_tracking_mobile_gpu.binarypb",
         "inputVideoStreamName": "input_video",
@@ -58,6 +61,7 @@ android_binary(
     resource_files = glob(["res/**"]),
     deps = [
         ":mediapipe_jni_lib",
+        "//mediapipe/examples/android/src/java/com/google/mediapipe/apps/basic:basic_lib",
         "//mediapipe/framework/formats:landmark_java_proto_lite",
         "//mediapipe/java/com/google/mediapipe/components:android_camerax_helper",
         "//mediapipe/java/com/google/mediapipe/components:android_components",

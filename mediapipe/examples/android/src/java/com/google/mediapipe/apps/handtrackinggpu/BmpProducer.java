@@ -17,9 +17,10 @@ public class BmpProducer extends Thread {
     Callbacks callbacks = null;
 
 
-    BmpProducer(Context context){
+    BmpProducer(Context context, Callbacks callbacks){
         Toast.makeText(context, "BmpProducer", Toast.LENGTH_SHORT).show();
         this.context = context;
+        this.callbacks = callbacks;
 //        bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.img2);
 //        bmp = Bitmap.createScaledBitmap(bmp,480,640,true);
 //        height = bmp.getHeight();
@@ -27,11 +28,10 @@ public class BmpProducer extends Thread {
         start();
     }
 
-    public void loadBitmaps(byte[] pixels, int width, int height, Callbacks callbacks ){
+    public void loadBitmaps(byte[] pixels, int width, int height ){
         this.pixels = pixels;
         this.width = width;
         this.height = height;
-        this.callbacks = callbacks;
 
     }
 

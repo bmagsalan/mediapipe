@@ -227,7 +227,17 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
 
         converter = new BitmapConverter(eglManager.getContext());
         converter.setConsumer(processor);
-        bitmapProducer = new BmpProducer(this);
+        bitmapProducer = new BmpProducer(this, new BmpProducer.Callbacks() {
+            @Override
+            public void finishdDrawingFrame() {
+                if (mRenderThread != null) {
+                    RenderHandler rh = mRenderThread.getHandler();
+                    StructPixelFrame structPixelFrame = new StructPixelFrame();
+                    rh.sendUnlock(bitmapProducer);
+
+                }
+            }
+        });
 
 
         new Timer().schedule(new TimerTask() {
@@ -240,7 +250,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
 
                 }
             }
-        },1000,BmpProducer.THREAD_DELAY * 2);
+        },1000);
     }
 
     @Override
