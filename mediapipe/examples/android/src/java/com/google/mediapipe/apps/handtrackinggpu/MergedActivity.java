@@ -91,8 +91,8 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
     private static final String OUTPUT_VIDEO_STREAM_NAME = "output_video";
     private static final String INPUT_NUM_HANDS_SIDE_PACKET_NAME = "num_hands";
     private static final String OUTPUT_LANDMARKS_STREAM_NAME = "hand_landmarks";
-    private static final int NUM_HANDS = 2;
-    private static final boolean FLIP_FRAMES_VERTICALLY = true;
+    private static final int NUM_HANDS = 1;
+    private static final boolean FLIP_FRAMES_VERTICALLY = false;
 
     static {
         // Load all native libraries needed by the app.
@@ -240,7 +240,7 @@ public class MergedActivity extends Activity implements SurfaceHolder.Callback {
 
                 }
             }
-        },1000,1000);
+        },1000,BmpProducer.THREAD_DELAY);
     }
 
     @Override

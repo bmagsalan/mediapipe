@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 public class BmpProducer extends Thread {
 
+    public static final long THREAD_DELAY = 50;
     private final Context context;
     CustomFrameAvailableListner customFrameAvailableListner;
 
@@ -55,7 +56,7 @@ public class BmpProducer extends Thread {
             pixels = null;
 
             try{
-                Thread.sleep(1000);
+                Thread.sleep(THREAD_DELAY);
             }catch (Exception e){
                 Log.d(TAG,e.toString());
             }
