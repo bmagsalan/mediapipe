@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 public class BmpProducer extends Thread {
 
-    public static final long THREAD_DELAY = 50;
+    public static final long THREAD_DELAY = 200;
     private final Context context;
     CustomFrameAvailableListner customFrameAvailableListner;
 
